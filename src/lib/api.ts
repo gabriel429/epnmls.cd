@@ -157,7 +157,7 @@ export const requestService = {
     return data;
   },
 
-  async approveRequest(id: number, notes?: string) {
+  async approveRequest(id: number) {
     const { data: user } = await supabase.auth.getUser();
 
     const { data, error } = await supabase
