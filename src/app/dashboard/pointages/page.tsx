@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { CreatePointageForm } from '@/components/CreatePointageForm';
+import { EditPointageForm } from '@/components/EditPointageForm';
 import type { Pointage } from '@/lib/types';
 
 export default function PointagesPage() {
@@ -10,6 +11,8 @@ export default function PointagesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedPointage, setSelectedPointage] = useState<Pointage | null>(null);
 
   useEffect(() => {
     fetchPointages();
@@ -83,6 +86,16 @@ export default function PointagesPage() {
             onSuccess={fetchPointages}
           />
 
+          <EditPointageForm
+            isOpen={editModalOpen}
+            pointage={selectedPointage}
+            onClose={() => {
+              setEditModalOpen(false);
+              setSelectedPointage(null);
+            }}
+            onSuccess={fetchPointages}
+          />
+
           {loading && (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -153,14 +166,20 @@ export default function PointagesPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm space-x-2">
-                          <button className="text-blue-600 hover:underline">
-                            Éditer
+                          <button
+                            onClick={() => {
+                              setSelectedPointage(p);
+                              setEditModalOpen(true);
+                            }}
+                            className="text-blue-600 hover:underline font-medium"
+                          >
+                            ✏️ Éditer
                           </button>
                           <button
                             onClick={() => handleDelete(p.id)}
-                            className="text-red-600 hover:underline"
+                            className="text-red-600 hover:underline font-medium"
                           >
-                            Supprimer
+                            🗑️ Supprimer
                           </button>
                         </td>
                       </tr>
