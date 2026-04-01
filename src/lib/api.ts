@@ -309,8 +309,6 @@ export const notificationService = {
   },
 
   subscribeToNotifications(callback: (notification: any) => void) {
-    const { data: user } = supabase.auth.getUser();
-
     return supabase
       .from('notifications_portail')
       .on('INSERT', (payload) => {
