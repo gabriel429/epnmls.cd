@@ -58,7 +58,7 @@ export default function AgentsPage() {
       <div className="grid md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="text-3xl font-bold text-blue-600">{agents.length}</div>
-          <p className="text-gray-600">Total d'agents</p>
+          <p className="text-gray-600">Total d&apos;agents</p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <div className="text-3xl font-bold text-green-600">
