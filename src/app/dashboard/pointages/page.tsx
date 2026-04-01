@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { CreatePointageForm } from '@/components/CreatePointageForm';
 import type { Pointage } from '@/lib/types';
 
 export default function PointagesPage() {
   const [pointages, setPointages] = useState<Pointage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchPointages();
@@ -42,6 +44,22 @@ export default function PointagesPage() {
     return styles[statut || ''] || 'bg-gray-100 text-gray-800';
   };
 
+  const handleDelete = async (id: number) => {
+    if (confirm('Êtes-vous sûr?')) {
+      try {
+        const { error: deleteError } = await supabase
+          .from('pointages')
+          .delete()
+          .eq('id', id);
+
+        if (deleteError) throw deleteError;
+        fetchPointages();
+      } catch (err) {
+        setError('Erreur lors de la suppression');
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="container-main">
@@ -51,49 +69,19 @@ export default function PointagesPage() {
               <h1 className="text-3xl font-bold text-gray-900">⏰ Pointages</h1>
               <p className="text-gray-600">Gestion des présences et absences</p>
             </div>
-            <button className="btn btn-primary">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="btn btn-primary"
+            >
               ➕ Saisir un pointage
             </button>
           </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <div className="grid md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Agent
-                </label>
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date début
-                </label>
-                <input
-                  type="date"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date fin
-                </label>
-                <input
-                  type="date"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex items-end">
-                <button className="w-full btn btn-primary">
-                  Filtrer
-                </button>
-              </div>
-            </div>
-          </div>
+          <CreatePointageForm
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={fetchPointages}
+          />
 
           {loading && (
             <div className="text-center py-12">
@@ -164,9 +152,15 @@ export default function PointagesPage() {
                             {p.statut || 'Inconnu'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm">
+                        <td className="px-6 py-4 text-sm space-x-2">
                           <button className="text-blue-600 hover:underline">
-                            Modifier
+                            Éditer
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="text-red-600 hover:underline"
+                          >
+                            Supprimer
                           </button>
                         </td>
                       </tr>
@@ -209,3 +203,4 @@ export default function PointagesPage() {
     </main>
   );
 }
+

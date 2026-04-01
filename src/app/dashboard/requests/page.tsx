@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { CreateRequestForm } from '@/components/CreateRequestForm';
 import type { Request } from '@/lib/types';
 
 export default function RequestsPage() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -42,6 +44,22 @@ export default function RequestsPage() {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const handleDelete = async (id: number) => {
+    if (confirm('Êtes-vous sûr?')) {
+      try {
+        const { error: deleteError } = await supabase
+          .from('requests')
+          .delete()
+          .eq('id', id);
+
+        if (deleteError) throw deleteError;
+        fetchRequests();
+      } catch (err) {
+        setError('Erreur lors de la suppression');
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="container-main">
@@ -51,10 +69,19 @@ export default function RequestsPage() {
               <h1 className="text-3xl font-bold text-gray-900">📋 Demandes</h1>
               <p className="text-gray-600">Gestion des demandes RH</p>
             </div>
-            <button className="btn btn-primary">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="btn btn-primary"
+            >
               ➕ Nouvelle Demande
             </button>
           </div>
+
+          <CreateRequestForm
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={fetchRequests}
+          />
 
           {loading && (
             <div className="text-center py-12">
@@ -72,7 +99,10 @@ export default function RequestsPage() {
           {!loading && requests.length === 0 && (
             <div className="bg-white rounded-lg shadow p-12 text-center">
               <p className="text-gray-600 mb-4">Aucune demande trouvée</p>
-              <button className="btn btn-primary">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="btn btn-primary"
+              >
                 ➕ Créer une première demande
               </button>
             </div>
@@ -124,9 +154,15 @@ export default function RequestsPage() {
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {new Date(req.created_at).toLocaleDateString('fr-FR')}
                         </td>
-                        <td className="px-6 py-4 text-sm">
+                        <td className="px-6 py-4 text-sm space-x-2">
                           <button className="text-blue-600 hover:underline">
                             Voir
+                          </button>
+                          <button
+                            onClick={() => handleDelete(req.id)}
+                            className="text-red-600 hover:underline"
+                          >
+                            Supprimer
                           </button>
                         </td>
                       </tr>
@@ -169,3 +205,4 @@ export default function RequestsPage() {
     </main>
   );
 }
+
