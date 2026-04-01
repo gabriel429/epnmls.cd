@@ -38,7 +38,6 @@ export function EditRequestForm({
   const [formData, setFormData] = useState({
     type_demande: '',
     description: '',
-    motivation: '',
     statut: 'pending',
   });
 
@@ -47,7 +46,6 @@ export function EditRequestForm({
       setFormData({
         type_demande: request.type_demande,
         description: request.description || '',
-        motivation: request.motivation || '',
         statut: request.statut,
       });
     }
@@ -65,7 +63,6 @@ export function EditRequestForm({
         .update({
           type_demande: formData.type_demande,
           description: formData.description,
-          motivation: formData.motivation,
           statut: formData.statut,
           updated_at: new Date().toISOString(),
         })
@@ -156,19 +153,6 @@ export function EditRequestForm({
               </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            📝 Motivation
-          </label>
-          <textarea
-            name="motivation"
-            value={formData.motivation}
-            onChange={handleChange}
-            rows={2}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-          />
         </div>
       </div>
     </Modal>
