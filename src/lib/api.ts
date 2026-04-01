@@ -310,10 +310,14 @@ export const notificationService = {
 
   subscribeToNotifications(callback: (notification: any) => void) {
     return supabase
-      .from('notifications_portail')
-      .on('INSERT', (payload) => {
-        callback(payload.new);
-      })
+      .channel('notifications_portail')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications_portail' },
+        (payload) => {
+          callback(payload.new);
+        }
+      )
       .subscribe();
   },
 };
