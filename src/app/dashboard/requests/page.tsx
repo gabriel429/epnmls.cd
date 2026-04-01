@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { CreateRequestForm } from '@/components/CreateRequestForm';
+import { EditRequestForm } from '@/components/EditRequestForm';
 import type { Request } from '@/lib/types';
 
 export default function RequestsPage() {
@@ -10,6 +11,8 @@ export default function RequestsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
 
   useEffect(() => {
     fetchRequests();
@@ -80,6 +83,16 @@ export default function RequestsPage() {
           <CreateRequestForm
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
+            onSuccess={fetchRequests}
+          />
+
+          <EditRequestForm
+            isOpen={editModalOpen}
+            request={selectedRequest}
+            onClose={() => {
+              setEditModalOpen(false);
+              setSelectedRequest(null);
+            }}
             onSuccess={fetchRequests}
           />
 
@@ -155,14 +168,20 @@ export default function RequestsPage() {
                           {new Date(req.created_at).toLocaleDateString('fr-FR')}
                         </td>
                         <td className="px-6 py-4 text-sm space-x-2">
-                          <button className="text-blue-600 hover:underline">
-                            Voir
+                          <button
+                            onClick={() => {
+                              setSelectedRequest(req);
+                              setEditModalOpen(true);
+                            }}
+                            className="text-blue-600 hover:underline font-medium"
+                          >
+                            ✏️ Éditer
                           </button>
                           <button
                             onClick={() => handleDelete(req.id)}
-                            className="text-red-600 hover:underline"
+                            className="text-red-600 hover:underline font-medium"
                           >
-                            Supprimer
+                            🗑️ Supprimer
                           </button>
                         </td>
                       </tr>
