@@ -12,6 +12,8 @@ export interface Agent {
   institution_id?: number;
   province_id?: number;
   role_id?: number;
+  date_embauche?: string;
+  statut_emploi?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
