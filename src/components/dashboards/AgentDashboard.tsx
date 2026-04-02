@@ -1,6 +1,7 @@
 /**
  * Agent Dashboard
- * Standard HR agent view - access to personal profile, requests, documents
+ * Standard HR agent view - matches original design
+ * Hero card with embedded stats + quick actions grid
  */
 
 'use client';
@@ -9,32 +10,33 @@ import { useState, useEffect } from 'react';
 
 interface AgentDashboardProps {
   agentName: string;
-  agentEmail: string;
 }
 
-export function AgentDashboard({ agentName, agentEmail }: AgentDashboardProps) {
+export function AgentDashboard({ agentName }: AgentDashboardProps) {
   const [stats, setStats] = useState({
-    myRequests: 0,
-    myDocuments: 0,
-    myPointages: 0,
-    notifications: 0,
+    documents: 0,
+    messages: 0,
+    communiques: 0,
+    enAttente: 0,
+    approuvees: 0,
+    absences: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [requests, rac1, rac2] = await Promise.all([
-          fetch('/api/requests').then(r => r.json()),
-          fetch('/api/documents').then(r => r.json()).catch(() => ({ count: 0 })),
-          fetch('/api/pointages').then(r => r.json()).catch(() => ({ count: 0 })),
+        const [requests] = await Promise.all([
+          fetch('/api/requests').then(r => r.json()).catch(() => ({ count: 0 })),
         ]);
 
         setStats({
-          myRequests: requests.count || 0,
-          myDocuments: rac1.count || 0,
-          myPointages: rac2.count || 0,
-          notifications: 0,
+          documents: 0,
+          messages: 0,
+          communiques: 0,
+          enAttente: requests.count || 0,
+          approuvees: 0,
+          absences: 0,
         });
       } catch (error) {
         console.error('Failed to fetch agent stats:', error);
@@ -46,150 +48,169 @@ export function AgentDashboard({ agentName, agentEmail }: AgentDashboardProps) {
     fetchStats();
   }, []);
 
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <main className="min-h-screen bg-grey-50">
       <div className="container-main">
-        {/* Hero Section */}
-        <div className="rh-hero mb-8">
-          <h1 className="rh-title">👋 Bienvenue, {agentName}!</h1>
-          <p className="rh-sub">Votre espace personnel - Gérez vos demandes et documents</p>
-          <div className="hero-tools">
-            <a href="/requests" className="btn-rh main">
-              ➕ Nouvelle demande
-            </a>
-            <a href="/documents" className="btn-rh main">
-              📄 Mes documents
-            </a>
-            <a href="/pointages" className="btn-rh main">
-              ⏰ Mon pointage
-            </a>
-          </div>
-        </div>
-
-        {/* Stats Grid - Agent View */}
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          {/* My Requests */}
-          <div className="card hover:shadow-xl hover:scale-105 transition-all">
-            <div className="card-body">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-grey-600 text-sm mb-2">📋 Mes demandes</p>
-                  <div className="text-4xl font-bold text-blue-600">
-                    {loading ? '...' : stats.myRequests}
-                  </div>
+        {/* Hero Card - Main Welcome Section */}
+        <div className="mb-12">
+          <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-600 rounded-3xl p-8 md:p-12 text-white shadow-2xl">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+              {/* Left: User Info */}
+              <div className="flex items-start gap-6 flex-1">
+                <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-4xl flex-shrink-0">
+                  👤
                 </div>
-                <div className="text-3xl">📝</div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold mb-1">Bienvenue(e), {agentName}</h1>
+                  <p className="text-blue-100 text-lg mb-2">Agent RH</p>
+                  <p className="text-blue-100 capitalize">{dateStr}</p>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* My Documents */}
-          <div className="card hover:shadow-xl hover:scale-105 transition-all">
-            <div className="card-body">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-grey-600 text-sm mb-2">📄 Mes documents</p>
-                  <div className="text-4xl font-bold text-green-600">
-                    {loading ? '...' : stats.myDocuments}
+              {/* Right: Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full md:w-auto">
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {loading ? '...' : stats.documents}
                   </div>
+                  <p className="text-blue-100 text-sm uppercase tracking-wide">Documents</p>
                 </div>
-                <div className="text-3xl">🗂️</div>
-              </div>
-            </div>
-          </div>
-
-          {/* My Pointages */}
-          <div className="card hover:shadow-xl hover:scale-105 transition-all">
-            <div className="card-body">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-grey-600 text-sm mb-2">⏰ Pointages</p>
-                  <div className="text-4xl font-bold text-orange-600">
-                    {loading ? '...' : stats.myPointages}
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {loading ? '...' : stats.messages}
                   </div>
+                  <p className="text-blue-100 text-sm uppercase tracking-wide">Messages</p>
                 </div>
-                <div className="text-3xl">📊</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Notifications */}
-          <div className="card hover:shadow-xl hover:scale-105 transition-all">
-            <div className="card-body">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-grey-600 text-sm mb-2">🔔 Notifications</p>
-                  <div className="text-4xl font-bold text-purple-600">0</div>
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {loading ? '...' : stats.communiques}
+                  </div>
+                  <p className="text-blue-100 text-sm uppercase tracking-wide">Communiques</p>
                 </div>
-                <div className="text-3xl">🔔</div>
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {loading ? '...' : stats.enAttente}
+                  </div>
+                  <p className="text-blue-100 text-sm uppercase tracking-wide">En attente</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {loading ? '...' : stats.approuvees}
+                  </div>
+                  <p className="text-blue-100 text-sm uppercase tracking-wide">Approuvées</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {loading ? '...' : stats.absences}
+                  </div>
+                  <p className="text-blue-100 text-sm uppercase tracking-wide">Absences</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {/* Quick Actions */}
-          <div className="md:col-span-2">
-            <div className="card">
-              <div className="card-header">⚡ Actions Rapides</div>
-              <div className="card-body">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <a href="/requests" className="btn btn-primary w-full justify-center">
-                    ➕ Faire une demande
-                  </a>
-                  <a href="/documents" className="btn btn-primary w-full justify-center">
-                    📤 Télécharger document
-                  </a>
-                  <a href="/pointages" className="btn btn-primary w-full justify-center">
-                    ✓ Confirmer pointage
-                  </a>
-                  <a href="/profile" className="btn btn-primary w-full justify-center">
-                    👤 Mon profil
-                  </a>
+        {/* Quick Actions Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-grey-900 mb-6 flex items-center gap-2">
+            ⚡ Actions rapides
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Nouvelle Demande */}
+            <a href="/requests" className="bg-white p-6 rounded-lg border border-grey-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+                  📝
+                </div>
+                <div>
+                  <h3 className="font-bold text-grey-900 text-lg">Nouvelle demande</h3>
+                  <p className="text-grey-500 text-sm">Congé, attestation...</p>
                 </div>
               </div>
-            </div>
-          </div>
+            </a>
 
-          {/* Profile Info */}
-          <div className="card">
-            <div className="card-header">👤 Mes Infos</div>
-            <div className="card-body space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-grey-500 text-xs">Nom</p>
-                <p className="text-grey-900 font-medium">{agentName}</p>
+            {/* Uploader Document */}
+            <a href="/documents" className="bg-white p-6 rounded-lg border border-grey-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+                  📤
+                </div>
+                <div>
+                  <h3 className="font-bold text-grey-900 text-lg">Uploader document</h3>
+                  <p className="text-grey-500 text-sm">Ajouter un fichier</p>
+                </div>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-grey-500 text-xs">Email</p>
-                <p className="text-grey-900 font-medium text-sm">{agentEmail}</p>
+            </a>
+
+            {/* Planning congés */}
+            <a href="/pointages" className="bg-white p-6 rounded-lg border border-grey-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+                  📅
+                </div>
+                <div>
+                  <h3 className="font-bold text-grey-900 text-lg">Planning congés</h3>
+                  <p className="text-grey-500 text-sm">Congés de ma structure</p>
+                </div>
               </div>
-              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                <p className="text-grey-500 text-xs">Status</p>
-                <p className="text-green-600 font-bold text-sm">✓ Actif</p>
+            </a>
+
+            {/* Documents de travail */}
+            <a href="/documents" className="bg-white p-6 rounded-lg border border-grey-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+                  📄
+                </div>
+                <div>
+                  <h3 className="font-bold text-grey-900 text-lg">Documents de travail</h3>
+                  <p className="text-grey-500 text-sm">Consulter les documents</p>
+                </div>
               </div>
-            </div>
+            </a>
+
+            {/* Plan de travail */}
+            <a href="/pointages" className="bg-white p-6 rounded-lg border border-grey-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+                  📋
+                </div>
+                <div>
+                  <h3 className="font-bold text-grey-900 text-lg">Plan de travail</h3>
+                  <p className="text-grey-500 text-sm">Consulter ou créer</p>
+                </div>
+              </div>
+            </a>
+
+            {/* Mon profil */}
+            <a href="/profile" className="bg-white p-6 rounded-lg border border-grey-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+                  👤
+                </div>
+                <div>
+                  <h3 className="font-bold text-grey-900 text-lg">Mon profil</h3>
+                  <p className="text-grey-500 text-sm">Voir mes infos</p>
+                </div>
+              </div>
+            </a>
           </div>
         </div>
 
-        {/* Resources Section */}
-        <div className="card">
-          <div className="card-header">📚 Ressources Utiles</div>
-          <div className="card-body">
-            <div className="grid md:grid-cols-3 gap-4">
-              <a href="/documents" className="p-4 border-l-4 border-blue-500 bg-blue-50 rounded hover:shadow-md transition">
-                <p className="font-semibold text-grey-900">📄 Documents</p>
-                <p className="text-sm text-grey-500">Accédez à vos documents</p>
-              </a>
-              <a href="/requests" className="p-4 border-l-4 border-green-500 bg-green-50 rounded hover:shadow-md transition">
-                <p className="font-semibold text-grey-900">✉️ Demandes</p>
-                <p className="text-sm text-grey-500">Gérez vos demandes</p>
-              </a>
-              <a href="/pointages" className="p-4 border-l-4 border-orange-500 bg-orange-50 rounded hover:shadow-md transition">
-                <p className="font-semibold text-grey-900">⏱️ Pointages</p>
-                <p className="text-sm text-grey-500">Vérifiez vos heures</p>
-              </a>
-            </div>
+        {/* Mes statistiques section (placeholder for future expansion) */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-grey-900 mb-6 flex items-center gap-2">
+            📊 Mes statistiques
+          </h2>
+          <div className="bg-white rounded-lg p-8 border border-grey-200">
+            <p className="text-grey-500">Vos statistiques détaillées apparaîtront ici...</p>
           </div>
         </div>
       </div>

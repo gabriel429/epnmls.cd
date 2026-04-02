@@ -32,7 +32,7 @@ export default function DashboardPage() {
 
   // Agent dashboard
   if (roleName === 'Agent') {
-    return <AgentDashboard agentName={user.name} agentEmail={user.email} />;
+    return <AgentDashboard agentName={user.name} />;
   }
 
   // Chef RH dashboard
