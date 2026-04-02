@@ -280,44 +280,46 @@ export const pointageService = {
   },
 };
 
-export const notificationService = {
-  async getNotifications() {
-    const { data: user } = await supabase.auth.getUser();
+export const dashboardService = {
+  async getStats() {
+    const response = await fetch('/api/dashboard/stats');
+    if (!response.ok) throw new Error('Failed to fetch stats');
+    return response.json();
+  },
+};
 
-    if (!user.user) return [];
-
+export const departmentService = {
+  async getDepartments() {
     const { data, error } = await supabase
-      .from('notifications_portail')
+      .from('departments')
       .select('*')
-      .eq('agent_id', user.user.id)
-      .order('created_at', { ascending: false });
+      .eq('is_active', true);
 
     if (error) throw error;
     return data;
   },
+};
 
-  async markAsRead(id: number) {
-    const { error } = await supabase
-      .from('notifications_portail')
-      .update({
-        is_read: true,
-        read_at: new Date().toISOString(),
-      })
-      .eq('id', id);
+export const functionService = {
+  async getFunctions() {
+    const { data, error } = await supabase
+      .from('fonctions')
+      .select('*')
+      .eq('is_active', true);
 
     if (error) throw error;
+    return data;
   },
+};
 
-  subscribeToNotifications(callback: (notification: any) => void) {
-    return supabase
-      .channel('notifications_portail')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications_portail' },
-        (payload) => {
-          callback(payload.new);
-        }
-      )
-      .subscribe();
+export const gradeService = {
+  async getGrades() {
+    const { data, error } = await supabase
+      .from('grades')
+      .select('*')
+      .eq('is_active', true);
+
+    if (error) throw error;
+    return data;
   },
 };

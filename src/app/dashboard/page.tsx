@@ -2,9 +2,40 @@
 
 import { useUser } from '@/hooks/useUser';
 import { redirect } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
+interface DashboardStats {
+  agents: number;
+  requests: number;
+  tasks: number;
+  notifications: number;
+}
 
 export default function DashboardPage() {
   const { user, loading } = useUser();
+  const [stats, setStats] = useState<DashboardStats>({
+    agents: 0,
+    requests: 0,
+    tasks: 0,
+    notifications: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/dashboard/stats');
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   if (loading) {
     return (
@@ -29,13 +60,13 @@ export default function DashboardPage() {
           <h1 className="rh-title">👋 Bienvenue, {user.name || user.email}!</h1>
           <p className="rh-sub">Tableau de bord E-PNMLS - Bienvenue dans votre espace de travail</p>
           <div className="hero-tools">
-            <a href="#" className="btn-rh main">
+            <a href="/rh/agents" className="btn-rh main">
               ➕ Nouvel agent
             </a>
-            <a href="#" className="btn-rh main">
+            <a href="/requests" className="btn-rh main">
               📋 Demandes
             </a>
-            <a href="#" className="btn-rh main">
+            <a href="/pointages" className="btn-rh main">
               ⏰ Pointages
             </a>
           </div>
@@ -49,7 +80,9 @@ export default function DashboardPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-grey-600 text-sm mb-2">👥 Agents</p>
-                  <div className="text-4xl font-bold text-primary-600">42</div>
+                  <div className="text-4xl font-bold text-primary-600">
+                    {statsLoading ? '...' : stats.agents}
+                  </div>
                 </div>
                 <div className="text-3xl">📊</div>
               </div>
@@ -62,7 +95,9 @@ export default function DashboardPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-grey-600 text-sm mb-2">⏳ Demandes en attente</p>
-                  <div className="text-4xl font-bold text-yellow-600">8</div>
+                  <div className="text-4xl font-bold text-yellow-600">
+                    {statsLoading ? '...' : stats.requests}
+                  </div>
                 </div>
                 <div className="text-3xl">📋</div>
               </div>
@@ -75,7 +110,9 @@ export default function DashboardPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-grey-600 text-sm mb-2">🎯 Tâches assignées</p>
-                  <div className="text-4xl font-bold text-orange-600">15</div>
+                  <div className="text-4xl font-bold text-orange-600">
+                    {statsLoading ? '...' : stats.tasks}
+                  </div>
                 </div>
                 <div className="text-3xl">✔️</div>
               </div>
@@ -88,7 +125,9 @@ export default function DashboardPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-grey-600 text-sm mb-2">🔔 Notifications</p>
-                  <div className="text-4xl font-bold text-purple-600">3</div>
+                  <div className="text-4xl font-bold text-purple-600">
+                    {statsLoading ? '...' : stats.notifications}
+                  </div>
                 </div>
                 <div className="text-3xl">🔴</div>
               </div>
@@ -104,18 +143,18 @@ export default function DashboardPage() {
               <div className="card-header">📋 Actions Rapides</div>
               <div className="card-body">
                 <div className="grid md:grid-cols-2 gap-4">
-                  <button className="btn btn-primary w-full justify-center">
+                  <a href="/rh/agents" className="btn btn-primary w-full justify-center">
                     ➕ Ajouter un Agent
-                  </button>
-                  <button className="btn btn-primary w-full justify-center">
+                  </a>
+                  <a href="/requests" className="btn btn-primary w-full justify-center">
                     📄 Voir les Demandes
-                  </button>
-                  <button className="btn btn-primary w-full justify-center">
+                  </a>
+                  <a href="/pointages" className="btn btn-primary w-full justify-center">
                     ⏰ Pointages
-                  </button>
-                  <button className="btn btn-primary w-full justify-center">
-                    📊 Rapports
-                  </button>
+                  </a>
+                  <a href="/documents" className="btn btn-primary w-full justify-center">
+                    📊 Documents
+                  </a>
                 </div>
               </div>
             </div>
