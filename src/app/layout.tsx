@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 import { AuthProvider } from '@/lib/auth-context';
+import { Navbar } from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'E-PNMLS - Portail RH',
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="fr">
       <body>
         <AuthProvider>
+          <Navbar />
           {children}
         </AuthProvider>
       </body>
